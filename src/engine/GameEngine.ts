@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { StateMachine } from './StateMachine';
+import { IUpdatable } from './IUpdatable';
 
 export interface RendererConfig {
   pixelRatioClamp?: number;
@@ -6,17 +8,30 @@ export interface RendererConfig {
   frustumCulling?: boolean;
 }
 
+export enum GameState {
+  BOOT = 'BOOT',
+  RUNNING = 'RUNNING',
+  GAME_OVER = 'GAME_OVER',
+}
+
 export class GameEngine {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
   renderer: THREE.WebGLRenderer;
   canvas: HTMLCanvasElement;
+  stateMachine: StateMachine;
 
   private resizeObserver: ResizeObserver | null = null;
   private animationFrameId: number | null = null;
   private handleResizeBound: (() => void) | null = null;
+  private updateList: IUpdatable[] = [];
+  private lastFrameTime: number = performance.now();
+  private fpsHistory: number[] = [];
+  private isWebGLSupported: boolean = true;
 
   constructor(canvas?: HTMLCanvasElement | null, config?: RendererConfig) {
+    this.checkWebGLSupport();
+
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x87ceeb);
 
@@ -56,6 +71,8 @@ export class GameEngine {
     this.setupFrustumCulling(config?.frustumCulling ?? true);
     this.handleResize();
     this.setupResizeHandler();
+
+    this.initializeStateMachine();
   }
 
   private setupCamera(): THREE.PerspectiveCamera {
@@ -133,6 +150,71 @@ export class GameEngine {
     this.renderer.render(this.scene, this.camera);
   }
 
+  private checkWebGLSupport(): void {
+    const canvas = document.createElement('canvas');
+    const gl =
+      canvas.getContext('webgl') || canvas.getContext('webgl2');
+
+    if (!gl) {
+      this.isWebGLSupported = false;
+      console.error(
+        'WebGL is not supported in this browser. Please use a modern browser with WebGL support.'
+      );
+      throw new Error('WebGL not supported');
+    }
+
+    this.isWebGLSupported = true;
+    console.log('WebGL is supported');
+  }
+
+  private initializeStateMachine(): void {
+    this.stateMachine = new StateMachine(GameState.BOOT);
+
+    this.stateMachine.registerState(GameState.BOOT, {
+      onEnter: () => {
+        console.log(`[STATE] Entering ${GameState.BOOT}`);
+      },
+      onExit: () => {
+        console.log(`[STATE] Exiting ${GameState.BOOT}`);
+      },
+    });
+
+    this.stateMachine.registerState(GameState.RUNNING, {
+      onEnter: () => {
+        console.log(`[STATE] Entering ${GameState.RUNNING}`);
+      },
+      onExit: () => {
+        console.log(`[STATE] Exiting ${GameState.RUNNING}`);
+      },
+    });
+
+    this.stateMachine.registerState(GameState.GAME_OVER, {
+      onEnter: () => {
+        console.log(`[STATE] Entering ${GameState.GAME_OVER}`);
+      },
+      onExit: () => {
+        console.log(`[STATE] Exiting ${GameState.GAME_OVER}`);
+      },
+    });
+
+    this.stateMachine.addStateChangeListener((previous, current) => {
+      console.log(`[STATE_TRANSITION] ${previous} -> ${current}`);
+    });
+  }
+
+  public registerUpdatable(updatable: IUpdatable): void {
+    if (!this.updateList.includes(updatable)) {
+      this.updateList.push(updatable);
+    }
+  }
+
+  public unregisterUpdatable(updatable: IUpdatable): void {
+    const index = this.updateList.indexOf(updatable);
+    if (index > -1) {
+      this.updateList.splice(index, 1);
+    }
+  }
+
   public render(callback?: (engine: GameEngine, deltaTime: number) => void): void {
     let lastTime = performance.now();
 
@@ -143,6 +225,10 @@ export class GameEngine {
       const deltaTime = (currentTime - lastTime) / 1000;
       lastTime = currentTime;
 
+      this.updateFpsMetrics(deltaTime);
+
+      this.updateAllUpdatables(deltaTime);
+
       if (callback) {
         callback(this, deltaTime);
       }
@@ -151,6 +237,30 @@ export class GameEngine {
     };
 
     animate();
+  }
+
+  private updateAllUpdatables(deltaTime: number): void {
+    this.updateList.forEach((updatable) => {
+      updatable.update(deltaTime);
+    });
+  }
+
+  private updateFpsMetrics(deltaTime: number): void {
+    const fps = 1 / deltaTime;
+    this.fpsHistory.push(fps);
+
+    if (this.fpsHistory.length > 60) {
+      this.fpsHistory.shift();
+    }
+
+    const averageFps =
+      this.fpsHistory.reduce((a, b) => a + b, 0) / this.fpsHistory.length;
+
+    if (this.fpsHistory.length % 60 === 0) {
+      console.log(
+        `[FRAME] Delta: ${deltaTime.toFixed(4)}s | Avg FPS: ${averageFps.toFixed(2)}`
+      );
+    }
   }
 
   public stop(): void {
@@ -181,5 +291,16 @@ export class GameEngine {
 
   public removeObject(object: THREE.Object3D): void {
     this.scene.remove(object);
+  }
+
+  public isWebGLCapable(): boolean {
+    return this.isWebGLSupported;
+  }
+
+  public getAverageFps(): number {
+    if (this.fpsHistory.length === 0) return 0;
+    return (
+      this.fpsHistory.reduce((a, b) => a + b, 0) / this.fpsHistory.length
+    );
   }
 }

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
+import { IUpdatable } from '../engine/IUpdatable';
 
-export class Player {
+export class Player implements IUpdatable {
   mesh: THREE.Mesh;
   velocity: THREE.Vector3;
 

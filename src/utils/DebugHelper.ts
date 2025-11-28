@@ -1,4 +1,6 @@
-export class DebugHelper {
+import { IUpdatable } from '../engine/IUpdatable';
+
+export class DebugHelper implements IUpdatable {
   private debugElement: HTMLElement | null;
   private frameCount: number = 0;
   private lastTime: number = performance.now();
