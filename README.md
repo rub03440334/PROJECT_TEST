@@ -1,31 +1,20 @@
-# Runner Game Engine
+# Input Manager Demo
 
-A 3D runner game engine built with **Three.js** and **Vite**, featuring a modular architecture for scalable game development.
+A unified input management system that abstracts desktop and mobile controls for web games.
 
-## Technology Stack
+## Features
 
-- **Three.js**: 3D graphics library
-- **Vite**: Next-generation frontend build tool
-- **TypeScript**: Static typing for JavaScript
-- **ESLint**: Code quality analysis
-- **Prettier**: Code formatting
+- **Desktop Support**: A/D and Arrow Left/Right keys
+- **Mobile Support**: Touch zones and swipe detection with dead-zone filtering
+- **Simultaneous Input**: Handles multiple keys pressed at once
+- **Debounced Events**: Prevents rapid-fire input updates
+- **Touch Prevention**: Stops scrolling during touch interactions
+- **Debug Visualization**: Real-time input state display
+- **Event System**: Subscribe to input state changes
 
-## Project Structure
+## Quick Start
 
-```
-src/
-├── engine/          # Core game engine (camera, renderer, scene management)
-├── entities/        # Game objects (Player, Ground, etc.)
-├── systems/         # Game systems (input, physics, AI, etc.)
-├── state/           # Game state management
-├── assets/          # 3D models, textures, audio
-└── utils/           # Utility helpers (debugging, math, etc.)
-```
-
-## Installation
-
-Install project dependencies:
-
+1. Install dependencies:
 ```bash
 npm install
 ```
