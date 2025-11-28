@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Manager Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            overflow: hidden;
+            touch-action: none;
+        }
+        
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #debug-overlay {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            z-index: 1000;
+            min-width: 200px;
+        }
+        
+        .debug-item {
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .active {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .inactive {
+            color: #f44336;
+        }
+        
+        #game-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        #player {
+            width: 50px;
+            height: 50px;
+            background: #2196F3;
+            border-radius: 50%;
+            position: absolute;
+            transition: left 0.1s ease-out;
+        }
+        
+        .touch-zone {
+            position: absolute;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            z-index: 100;
+            opacity: 0;
+        }
+        
+        #touch-left {
+            left: 0;
+        }
+        
+        #touch-right {
+            right: 0;
+        }
+        
+        .touch-zone:active {
+            opacity: 0.1;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        #instructions {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="debug-overlay">
+            <h3>Input Debug</h3>
+            <div class="debug-item">
+                <span>Left Intent:</span>
+                <span id="left-intent" class="inactive">OFF</span>
+            </div>
+            <div class="debug-item">
+                <span>Right Intent:</span>
+                <span id="right-intent" class="inactive">OFF</span>
+            </div>
+            <div class="debug-item">
+                <span>Input Type:</span>
+                <span id="input-type">None</span>
+            </div>
+        </div>
+        
+        <div id="game-area">
+            <div id="touch-left" class="touch-zone"></div>
+            <div id="touch-right" class="touch-zone"></div>
+            <div id="player"></div>
+        </div>
+        
+        <div id="instructions">
+            <p>Desktop: Use A/D or Arrow Left/Right keys</p>
+            <p>Mobile: Touch left/right half of screen</p>
+        </div>
+    </div>
+    
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>

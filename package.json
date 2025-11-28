@@ -1,0 +1,17 @@
+{
+  "name": "input-manager-game",
+  "version": "1.0.0",
+  "description": "Game with unified input management for desktop and mobile",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "jsdom": "^27.2.0",
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}
