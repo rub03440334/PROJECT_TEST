@@ -1,0 +1,45 @@
+# Dependencies
+node_modules
+/.expo
+/.expo-shared
+dist
+build
+
+# Environment variables (don't commit .env, only .env.example)
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage
+.nyc_output
+
+# Build output
+*.apk
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.xcworkspace
+Pods
+xcuserdata
+
+# Babel
+.cache
+
+# Logs
+npm-debug.log
+yarn-error.log
