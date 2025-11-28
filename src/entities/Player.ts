@@ -1,15 +1,9 @@
 import * as THREE from 'three';
+import { IUpdatable } from '../engine/IUpdatable';
 
-export interface PlayerOptions {
-  size?: number;
-  color?: number;
-}
-
-export class Player {
-  private readonly mesh: THREE.Mesh;
-
-  constructor(options?: PlayerOptions) {
-    const size = options?.size ?? 1;
+export class Player implements IUpdatable {
+  mesh: THREE.Mesh;
+  velocity: THREE.Vector3;
 
     const geometry = new THREE.BoxGeometry(size, size, size, 1, 1, 1);
     const material = new THREE.MeshStandardMaterial({

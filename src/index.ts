@@ -1,4 +1,5 @@
-import { GameEngine } from './engine/GameEngine';
+import { GameEngine, GameState } from './engine/GameEngine';
+import { Player } from './entities/Player';
 import { Ground } from './entities/Ground';
 import { DebugHelper } from './utils/DebugHelper';
 import { PlayerController, PlayerIntents } from './controllers/PlayerController';
@@ -21,49 +22,31 @@ const debugHelper = new DebugHelper();
 
 gameEngine.addObject(ground.getMesh());
 
-const inputIntents: PlayerIntents = {
-  moveLeft: false,
-  moveRight: false,
-};
+gameEngine.registerUpdatable(player);
+gameEngine.registerUpdatable(debugHelper);
 
-const intentKeyMap: Record<string, keyof PlayerIntents> = {
-  arrowleft: 'moveLeft',
-  a: 'moveLeft',
-  arrowright: 'moveRight',
-  d: 'moveRight',
-};
-
-const handleIntentChange = (event: KeyboardEvent, isActive: boolean): void => {
-  const intentKey = intentKeyMap[event.key.toLowerCase()];
-
-  if (!intentKey) {
-    return;
-  }
-
-  event.preventDefault();
-  inputIntents[intentKey] = isActive;
-};
-
-const handleKeyDown = (event: KeyboardEvent): void => {
-  handleIntentChange(event, true);
-};
-
-const handleKeyUp = (event: KeyboardEvent): void => {
-  handleIntentChange(event, false);
-};
-
-window.addEventListener('keydown', handleKeyDown);
-window.addEventListener('keyup', handleKeyUp);
+let bootTimer = 0;
+const bootDuration = 1;
 
 gameEngine.render((_engine, deltaTime) => {
-  playerController.update(deltaTime, inputIntents);
-  debugHelper.update(deltaTime);
+  const currentState = _engine.stateMachine.getState();
+
+  if (currentState === GameState.BOOT) {
+    bootTimer += deltaTime;
+    if (bootTimer >= bootDuration) {
+      _engine.stateMachine.changeState(GameState.RUNNING);
+      bootTimer = 0;
+    }
+  }
 
   const targetFps = 60;
-  const isPerformanceOptimal = debugHelper.getFps() >= targetFps * 0.95;
+  const averageFps = _engine.getAverageFps();
+  const isPerformanceOptimal = averageFps >= targetFps * 0.95;
 
-  if (!isPerformanceOptimal) {
-    console.warn(`Performance warning: FPS below target (${debugHelper.getFps()}/${targetFps})`);
+  if (!isPerformanceOptimal && averageFps > 0) {
+    console.warn(
+      `Performance warning: FPS below target (${averageFps.toFixed(2)}/${targetFps})`
+    );
   }
 });
 
