@@ -19,113 +19,167 @@ A unified input management system that abstracts desktop and mobile controls for
 npm install
 ```
 
-2. Start development server:
+## Development
+
+Start the development server with hot module reloading:
+
 ```bash
 npm run dev
 ```
 
-3. Open browser to `http://localhost:3000`
+The application will automatically open in your browser at `http://localhost:3000`.
 
-## Testing
+The dev server provides:
+- Hot module replacement (HMR) for instant updates
+- Full Three.js scene with debug info overlay
+- FPS counter and performance monitoring
 
-### Automated Tests
+## Building
+
+Build the project for production:
+
 ```bash
-npm run test
+npm run build
 ```
 
-### Manual Testing
-Open browser console and run:
-```javascript
-const runner = new ManualTestRunner();
-runner.runTests();
+The compiled output will be in the `dist/` directory, optimized for performance with:
+- Tree-shaking for unused code removal
+- Minification
+- Source maps for debugging
+
+## Preview
+
+Preview the production build locally:
+
+```bash
+npm run preview
 ```
 
-### Manual Verification Steps
+## Scripts
 
-1. **Keyboard Input**:
-   - Press `A` or `Left Arrow` → Left intent should activate
-   - Press `D` or `Right Arrow` → Right intent should activate
-   - Hold both `A` and `D` → Both intents should be active (PlayerController handles cancellation)
+| Script | Purpose |
+|--------|---------|
+| `npm run dev` | Start development server with HMR |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build |
+| `npm run type-check` | Run TypeScript type checking |
+| `npm run lint` | Run ESLint code quality checks |
+| `npm run format` | Format code with Prettier |
 
-2. **Touch Input**:
-   - Touch/click left half of screen → Left intent activates
-   - Touch/click right half of screen → Right intent activates
-   - Swipe left/right → Movement with dead-zone filtering
+## Development Workflow
 
-3. **Debug Overlay**:
-   - Monitor the debug overlay in top-left corner
-   - Check console logs for detailed state changes
+### Type Checking
+
+Ensure type safety before building:
+
+```bash
+npm run type-check
+```
+
+### Code Quality
+
+Check for linting issues:
+
+```bash
+npm run lint
+```
+
+### Formatting
+
+Auto-format code to maintain consistency:
+
+```bash
+npm run format
+```
 
 ## Architecture
 
-### InputManager
-Core class that handles all input processing:
-- Keyboard event listeners (keydown/keyup)
-- Touch event listeners (touchstart/touchmove/touchend)
-- Mouse event listeners for desktop testing
-- State management and debouncing
-- Subscription system for state changes
+### GameEngine
 
-### PlayerController
-Consumes input intents to control player movement:
-- Responds to left/right movement intents
-- Handles simultaneous input cancellation
-- Keeps player within screen bounds
+The core engine (`src/engine/GameEngine.ts`) handles:
+- Scene setup and management
+- Camera configuration
+- Renderer initialization with shadow support
+- Responsive canvas resizing
+- Animation loop management
 
-### DebugOverlay
-Visualizes input state for testing:
-- Real-time display of intent flags
-- Input type indicator
-- Console logging
+### Entities
 
-## File Structure
+Game objects inherit from base entity patterns:
+- **Player** (`src/entities/Player.ts`): Main player character with rotation
+- **Ground** (`src/entities/Ground.ts`): Game plane
 
-```
-src/
-├── InputManager.js      # Core input handling logic
-├── PlayerController.js  # Player movement controller
-├── DebugOverlay.js      # Debug visualization
-├── main.js             # Application entry point
-└── tests/
-    ├── InputManager.test.js    # Automated tests
-    └── ManualTestRunner.js     # Manual test utilities
-```
+### Debug Utilities
 
-## Input Mapping
-
-| Input | Action | Intent |
-|-------|--------|--------|
-| A / Arrow Left | Move Left | `leftIntent: true` |
-| D / Arrow Right | Move Right | `rightIntent: true` |
-| Touch Left Zone | Move Left | `leftIntent: true` |
-| Touch Right Zone | Move Right | `rightIntent: true` |
-| Swipe Left | Move Left | `leftIntent: true` |
-| Swipe Right | Move Right | `rightIntent: true` |
+The `DebugHelper` provides real-time performance metrics:
+- FPS counter
+- Canvas resolution
+- Device pixel ratio
+- Current time
 
 ## Configuration
 
-### Dead Zone
-Default: 10 pixels
-- Touch movements within this range use zone-based detection
-- Movements beyond this range use swipe detection
+### Vite Config
 
-### Swipe Threshold
-Default: 30 pixels
-- Minimum distance to register as a swipe
+Edit `vite.config.ts` to customize:
+- Development server port (default: 3000)
+- Build target (ES2020)
+- Source map generation
 
-### Debounce Delay
-Default: 16ms (~60fps)
-- Prevents excessive input updates
+### TypeScript Config
+
+Modify `tsconfig.json` to adjust:
+- Compilation target
+- Module resolution
+- Strict type checking
+
+### ESLint & Prettier
+
+Configure code quality in:
+- `.eslintrc.json`: Linting rules
+- `.prettierrc.json`: Formatting preferences
+
+## Performance Optimization
+
+The engine is pre-configured with:
+- **Pixel ratio clamping** (max 2.0) for high-DPI displays
+- **Antialiasing** enabled for smooth rendering
+- **Frustum culling** for rendering only visible objects
+- **Shadow mapping** with 2048x2048 resolution
+- **Fog** for distant object optimization
+- **requestAnimationFrame** for frame-synchronized animation
 
 ## Browser Support
 
-- Modern browsers with ES6 module support
-- Touch events for mobile devices
-- Mouse events for desktop testing
+- Chrome/Chromium (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
 
-## Development
+## Troubleshooting
 
-The project uses Vite for development and testing:
-- Fast HMR (Hot Module Replacement)
-- Vitest for unit testing
-- JSOM environment for DOM testing
+### No canvas appears
+- Ensure the HTML contains `<div id="app"></div>`
+- Check browser console for errors
+
+### Low FPS
+- Reduce object count
+- Lower shadow map resolution
+- Disable antialiasing in GameEngine config
+
+### Port already in use
+- Change port in `vite.config.ts` server config
+- Or kill existing process: `lsof -ti:3000 | xargs kill -9`
+
+## License
+
+MIT
+
+## Contributing
+
+When adding new features:
+1. Follow the existing code style (enforced by ESLint/Prettier)
+2. Add TypeScript types for all functions
+3. Place new entities in `src/entities/`
+4. Place new systems in `src/systems/`
+5. Test with `npm run type-check` before committing
