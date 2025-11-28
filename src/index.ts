@@ -1,7 +1,7 @@
 import { GameEngine } from './engine/GameEngine';
-import { Player } from './entities/Player';
 import { Ground } from './entities/Ground';
 import { DebugHelper } from './utils/DebugHelper';
+import { PlayerController, PlayerIntents } from './controllers/PlayerController';
 
 const gameEngine = new GameEngine(null, {
   pixelRatioClamp: 2,
@@ -9,15 +9,54 @@ const gameEngine = new GameEngine(null, {
   frustumCulling: true,
 });
 
-const player = new Player();
+const playerController = new PlayerController(gameEngine, {
+  laneCount: 3,
+  laneWidth: 3,
+  maxHorizontalSpeed: 12,
+  velocityBlend: 10,
+});
+
 const ground = new Ground();
 const debugHelper = new DebugHelper();
 
-gameEngine.addObject(player.getMesh());
 gameEngine.addObject(ground.getMesh());
 
+const inputIntents: PlayerIntents = {
+  moveLeft: false,
+  moveRight: false,
+};
+
+const intentKeyMap: Record<string, keyof PlayerIntents> = {
+  arrowleft: 'moveLeft',
+  a: 'moveLeft',
+  arrowright: 'moveRight',
+  d: 'moveRight',
+};
+
+const handleIntentChange = (event: KeyboardEvent, isActive: boolean): void => {
+  const intentKey = intentKeyMap[event.key.toLowerCase()];
+
+  if (!intentKey) {
+    return;
+  }
+
+  event.preventDefault();
+  inputIntents[intentKey] = isActive;
+};
+
+const handleKeyDown = (event: KeyboardEvent): void => {
+  handleIntentChange(event, true);
+};
+
+const handleKeyUp = (event: KeyboardEvent): void => {
+  handleIntentChange(event, false);
+};
+
+window.addEventListener('keydown', handleKeyDown);
+window.addEventListener('keyup', handleKeyUp);
+
 gameEngine.render((_engine, deltaTime) => {
-  player.update(deltaTime);
+  playerController.update(deltaTime, inputIntents);
   debugHelper.update(deltaTime);
 
   const targetFps = 60;
@@ -29,5 +68,8 @@ gameEngine.render((_engine, deltaTime) => {
 });
 
 window.addEventListener('beforeunload', () => {
+  window.removeEventListener('keydown', handleKeyDown);
+  window.removeEventListener('keyup', handleKeyUp);
+  playerController.dispose();
   gameEngine.dispose();
 });
